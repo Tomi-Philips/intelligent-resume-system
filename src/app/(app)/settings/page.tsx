@@ -85,11 +85,12 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3">
             <Button
               onClick={handleSaveProfile}
+              isLoading={isSaving}
               disabled={isSaving || !displayName.trim()}
               className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl border-none shadow-sm"
             >
-              {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-              {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+              {!isSaving && (saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />)}
+              {isSaving ? 'Saving…' : saved ? 'Saved!' : 'Save Changes'}
             </Button>
           </div>
         </CardContent>
@@ -149,11 +150,12 @@ export default function SettingsPage() {
             </div>
             <Button
               onClick={handleSignOut}
+              isLoading={isSigningOut}
               disabled={isSigningOut}
               className="gap-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl border-none shadow-sm"
             >
-              <LogOut className="w-4 h-4" />
-              {isSigningOut ? 'Signing out...' : 'Sign Out'}
+              {!isSigningOut && <LogOut className="w-4 h-4" />}
+              {isSigningOut ? 'Signing out…' : 'Sign Out'}
             </Button>
           </div>
         </CardContent>

@@ -138,3 +138,20 @@
   animation: fade-in 0.3s ease-out forwards;
   opacity: 0;
 }
+
+/* ── Navigation / loading bar ── */
+@keyframes loading-bar {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* One-shot attention pulse for error banners */
+@keyframes pulse-once {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+.animate-pulse-once {
+  animation: pulse-once 0.6s ease-out;
+}

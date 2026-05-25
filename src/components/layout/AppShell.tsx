@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { NavigationProgress } from '@/components/ui/NavigationProgress';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-full bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-[#090A0F] dark:via-[#0F1117] dark:to-[#0A0C10] overflow-hidden">
+      <NavigationProgress />
       {/* Desktop Sidebar */}
       <aside className="hidden md:block h-screen sticky top-0 border-r border-slate-200 dark:border-slate-800 shrink-0">
         <Sidebar />
