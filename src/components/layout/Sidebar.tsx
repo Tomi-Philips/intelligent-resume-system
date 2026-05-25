@@ -1,9 +1,10 @@
-
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabaseClient';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -23,6 +24,32 @@ import {
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { name, email, signOut } = useAuth();
+  const [candidateCount, setCandidateCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchCount() {
+      try {
+        const { count, error } = await supabase
+          .from('candidates')
+          .select('*', { count: 'exact', head: true });
+        if (!error && count !== null) {
+          setCandidateCount(count);
+        }
+      } catch (err) {
+        console.error('Error fetching candidate count in sidebar:', err);
+      }
+    }
+    fetchCount();
+  }, []);
+
+  const getInitials = (userName: string) => {
+    const parts = userName.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return userName.slice(0, 2).toUpperCase();
+  };
 
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -39,7 +66,7 @@ export function Sidebar() {
 
   return (
     <div 
-      className={`relative h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-300 flex flex-col transition-all duration-300 shadow-2xl ${
+      className={`relative h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-300 flex flex-col transition-all duration-300 shadow-2xl ${
         collapsed ? 'w-20' : 'w-72'
       }`}
     >
@@ -61,12 +88,12 @@ export function Sidebar() {
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
             <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">M</span>
+              <span className="text-white font-bold text-lg">H</span>
             </div>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-white font-bold text-xl tracking-tight">Minded AI</span>
+              <span className="text-white font-bold text-xl tracking-tight">HireFlow</span>
               <span className="text-xs text-blue-400 font-medium">v2.0</span>
             </div>
           )}
@@ -128,7 +155,7 @@ export function Sidebar() {
             <span className="text-xs font-semibold text-blue-400">AI Insight</span>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            You have <span className="text-blue-400 font-bold">12 new candidates</span> matched for your active positions.
+            You have <span className="text-blue-400 font-bold">{candidateCount !== null ? `${candidateCount} candidates` : 'new candidates'}</span> matched for your active positions.
           </p>
         </div>
       )}
@@ -138,11 +165,11 @@ export function Sidebar() {
         <div className={`${collapsed ? 'px-3' : 'px-4'} mb-4`}>
           {!collapsed && (
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-800 to-slate-800/50 border border-slate-700">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg">
-                RU
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg text-sm shrink-0">
+                {getInitials(name)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">Recruiter User</p>
+                <p className="text-sm font-semibold text-white truncate">{name}</p>
                 <div className="flex items-center gap-1">
                   <Crown className="w-3 h-3 text-amber-500" />
                   <p className="text-xs text-slate-400">Admin Plan</p>
@@ -152,7 +179,7 @@ export function Sidebar() {
           )}
           {collapsed && (
             <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg">
-              RU
+              {getInitials(name)}
             </div>
           )}
         </div>
@@ -183,7 +210,10 @@ export function Sidebar() {
             );
           })}
           
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-400 hover:bg-rose-500/10 group relative">
+          <button 
+            onClick={signOut}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-400 hover:bg-rose-500/10 group relative"
+          >
             <LogOut className="w-5 h-5" />
             {!collapsed && <span>Sign Out</span>}
             {collapsed && (

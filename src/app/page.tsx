@@ -24,10 +24,10 @@ export default function LandingPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-blue-600 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
               <div className="relative w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="font-bold text-white text-lg tracking-tight">M</span>
+                <span className="font-bold text-white text-lg tracking-tight">H</span>
               </div>
             </div>
-            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Minded AI</span>
+            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">HireFlow</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             {['Features', 'Docs'].map((item) => (
@@ -55,7 +55,7 @@ export default function LandingPage() {
       <main className="container mx-auto px-6 pt-24 pb-28 text-center relative z-10 max-w-7xl">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 text-blue-300 text-sm font-medium mb-8 shadow-lg">
           <Sparkles className="w-3.5 h-3.5 fill-blue-400" />
-          <span className="bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent">Minded AI 1.0 is live</span>
+          <span className="bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent">HireFlow 1.0 is live</span>
           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
         </div>
         
@@ -112,7 +112,7 @@ export default function LandingPage() {
               <div className="w-3 h-3 rounded-full bg-red-500/60" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
               <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              <div className="ml-4 text-xs text-slate-500 font-mono">dashboard.minded.ai/rankings</div>
+              <div className="ml-4 text-xs text-slate-500 font-mono">dashboard.hireflow.ai/rankings</div>
             </div>
             <div className="p-6">
               {/* Improved mock UI */}
@@ -211,7 +211,7 @@ export default function LandingPage() {
             <div className="relative">
               <Star className="w-12 h-12 text-blue-400 mx-auto mb-6 fill-blue-400/20" />
               <h3 className="text-3xl md:text-4xl font-bold mb-4">Ready to transform your hiring?</h3>
-              <p className="text-slate-300 mb-8 max-w-md mx-auto">Join thousands of companies using Minded AI to find top talent faster.</p>
+              <p className="text-slate-300 mb-8 max-w-md mx-auto">Join thousands of companies using HireFlow to find top talent faster.</p>
               <Link href="/login">
                 <Button size="lg" className="bg-white text-black hover:bg-slate-100 rounded-full px-8 shadow-lg group">
                   Start Free Trial
@@ -230,9 +230,9 @@ export default function LandingPage() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="font-bold text-white text-sm">M</span>
+                  <span className="font-bold text-white text-sm">H</span>
                 </div>
-                <span className="font-bold text-lg tracking-tight">Minded AI</span>
+                <span className="font-bold text-lg tracking-tight">HireFlow</span>
               </div>
               <p className="text-slate-500 text-sm max-w-xs">Intelligent hiring platform that helps you find the perfect candidate in seconds.</p>
             </div>
@@ -250,7 +250,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="pt-8 border-t border-white/10 text-center text-slate-600 text-sm">
-            <p>© 2026 Minded AI. Built for the future of hiring. All rights reserved.</p>
+            <p>© 2026 HireFlow. Built for the future of hiring. All rights reserved.</p>
           </div>
         </div>
       </footer>

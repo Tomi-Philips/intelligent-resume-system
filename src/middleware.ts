@@ -26,9 +26,10 @@ export async function middleware(req: NextRequest) {
   );
 
   // Refresh session – keeps auth tokens valid
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   const path = req.nextUrl.pathname;
+  console.log(`[MIDDLEWARE] Path: ${path}, User: ${user?.id || 'null'}, AuthError: ${authError?.message || 'none'}`);
 
   const isProtectedRoute =
     path.startsWith('/dashboard') ||
@@ -53,6 +54,7 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/login';
     redirectUrl.searchParams.set('redirectTo', path);
+    console.log(`[MIDDLEWARE] Redirecting unauthenticated user from ${path} to /login`);
     return NextResponse.redirect(redirectUrl);
   }
 

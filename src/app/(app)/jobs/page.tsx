@@ -1,10 +1,9 @@
 import React from 'react';
 import { jobService } from '@/services/job.service';
-import { JobCard } from '@/components/jobs/JobCard';
+import { JobsList } from '@/components/jobs/JobsList';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
-import { Plus, Briefcase, TrendingUp, Clock, Filter, Download, Search } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
+import { Plus, Briefcase, TrendingUp, Clock } from 'lucide-react';
 
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
 
@@ -68,51 +67,8 @@ export default async function JobsPage() {
         />
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input 
-            placeholder="Search jobs by title, department, or location..." 
-            className="pl-10 h-11 bg-white dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500/20"
-          />
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="h-11 px-4 border-slate-200 dark:border-slate-800 rounded-xl">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="outline" className="h-11 px-4 border-slate-200 dark:border-slate-800 rounded-xl">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-        </div>
-      </div>
-
-      {/* Jobs Grid */}
-      {jobs.length === 0 ? (
-        <div className="text-center py-20 bg-white/50 dark:bg-slate-900/30 backdrop-blur-sm rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 flex items-center justify-center">
-            <Briefcase className="w-10 h-10 text-slate-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">No jobs posted yet</h3>
-          <p className="text-slate-500 mt-2 mb-6 max-w-sm mx-auto">
-            Create your first job posting to start accepting resumes and find the perfect candidate.
-          </p>
-          <Link href="/jobs/create">
-            <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Your First Job
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
-        </div>
-      )}
+      {/* Live Interactive Jobs List (Search, Status Filter, Grid) */}
+      <JobsList initialJobs={jobs} />
     </div>
   );
 }

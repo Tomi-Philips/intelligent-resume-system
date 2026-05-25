@@ -6,19 +6,7 @@ import Link from 'next/link';
 
 export default function CreateJobPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-[#090A0F] dark:via-[#0F1117] dark:to-[#0A0C10]">
-      
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 -left-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px] dark:bg-blue-600/10 animate-pulse-slow" />
-        <div className="absolute bottom-0 -right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-[120px] dark:bg-purple-600/10 animate-pulse-slow-delayed" />
-        <div className="absolute top-1/3 left-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-500/5 to-indigo-500/5 blur-3xl" />
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5kb2QiPjxwYXRoIGQ9Ik0zMCAzMG0tMjkgMGEyOSAyOSAwIDEgMCA1OCAwQTI5IDI5IDAgMSAwIDMwIDMweiIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjEiLz48L2c+PC9zdmc+')] bg-repeat opacity-[0.02] dark:opacity-[0.03]" />
-      </div>
-
-      <div className="relative z-10 container mx-auto py-8 px-4 max-w-4xl">
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
         {/* Back Navigation */}
         <Link 
           href="/jobs" 
@@ -160,8 +148,6 @@ export default function CreateJobPage() {
             ⚡ Your job posting will be live immediately and start attracting AI-matched candidates
           </p>
         </div>
-      </div>
-
     </div>
   );
 }

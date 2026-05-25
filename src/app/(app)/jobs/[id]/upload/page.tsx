@@ -1,7 +1,4 @@
 import React from 'react';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { jobService } from '@/services/job.service';
 import { notFound } from 'next/navigation';
 import { ResumeUploader } from '@/components/resumes/ResumeUploader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -17,74 +14,50 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-
-// ── Build a minimal Supabase server client (inline to avoid supabaseServer indirection bugs) ──
-async function getSupabase() {
-  const cookieStore = await cookies();
-  const cookieList   = cookieStore.getAll();
-  console.log('[UPLOAD] cookies:', cookieList.length, cookieList.map(c => c.name).join(', ') || '(none)');
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll()  { return cookieStore.getAll(); },
-        setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {/* ServerComponents can't write cookies — ignored */ }
-        },
-      },
-    },
-  );
-}
+import { createSupabaseServerClient } from '@/lib/supabaseServer';
 
 export default async function UploadResumesPage({
   params,
 }: {
   params: Promise<{ id: string }> | { id: string };
 }) {
-  const { id } = params instanceof Promise ? await params : params;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const id = resolvedParams?.id;
   console.log('[UPLOAD] START jobId:', id);
 
-  let supabase: Awaited<ReturnType<typeof getSupabase>>;
-  try {
-    supabase = await getSupabase();
-    console.log('[UPLOAD] Supabase client OK');
-  } catch (e: any) {
-    console.error('[UPLOAD] Supabase client FAILED:', e.message);
-    throw e;
+  if (!id) {
+    console.error('[UPLOAD] No id in params — returning notFound()');
+    notFound();
   }
 
-  // Raw query first — bypass jobService to isolate the failure point
+  const supabase = await createSupabaseServerClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  console.log('[UPLOAD] authenticated user:', user?.id || 'null', 'error:', userError?.message || 'none');
+
+  if (!user) {
+    // Not authenticated — redirect to login rather than 404
+    const { redirect } = await import('next/navigation');
+    redirect(`/login?redirectTo=/jobs/${id}/upload`);
+  }
+
+  // Query the job
   const { data: rawJob, error: rawError } = await supabase
     .from('jobs')
     .select('*')
     .eq('id', id)
     .single();
-  console.log('[UPLOAD] raw query:', { title: rawJob?.title ?? 'null', error: rawError?.code ?? 'none' });
+  console.log('[UPLOAD] raw query result:', rawJob ? { id: rawJob.id, title: rawJob.title } : 'null', 'error:', rawError?.message);
 
-  const job = await jobService.getJobById(id, supabase);
-  console.log('[UPLOAD] getJobById:', job?.title ?? 'NULL');
+  const job = rawJob ?? null;
 
   if (!job) {
-    console.error('[UPLOAD] NOT FOUND — aborting');
+    console.error('[UPLOAD] Job not found for id:', id, '| DB error:', rawError?.message);
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-[#090A0F] dark:via-[#0F1117] dark:to-[#0A0C10]">
-
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 -right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px] dark:bg-blue-600/10 animate-pulse-slow" />
-        <div className="absolute bottom-0 -left-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-[120px] dark:bg-purple-600/10 animate-pulse-slow-delayed" />
-        <div className="absolute top-1/3 left-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-500/5 to-indigo-500/5 blur-3xl" />
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5kb2QiPjxwYXRoIGQ9Ik0zMCAzMG0tMjkgMGEyOSAyOSAwIDEgMCA1OCAwQTI5IDI5IDAgMSAwIDMwIDMweiIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjEiLz48L2c+PC9zdmc+')] bg-repeat opacity-[0.02] dark:opacity-[0.03]" />
-      </div>
-
-      <div className="relative z-10 container mx-auto py-8 px-4 max-w-5xl">
+    <div className="container mx-auto py-8 px-4 max-w-5xl">
         {/* Back Navigation */}
         <Link
           href={`/jobs/${job.id}`}
@@ -228,8 +201,6 @@ export default async function UploadResumesPage({
             Your files are secure and will be deleted after processing
           </p>
         </div>
-      </div>
-
     </div>
   );
 }

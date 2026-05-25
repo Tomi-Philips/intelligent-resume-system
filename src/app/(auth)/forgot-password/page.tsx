@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
             </div>
             <div className="text-left">
               <span className="font-bold text-2xl tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-white/70 bg-clip-text text-transparent block">
-                Minded AI
+                HireFlow
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Recruitment Intelligence</span>
             </div>

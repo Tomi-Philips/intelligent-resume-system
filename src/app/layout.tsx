@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Minded AI - Intelligent Resume System",
+  title: "HireFlow - Intelligent Resume System",
   description: "AI-powered resume screening and candidate ranking system.",
 };
 

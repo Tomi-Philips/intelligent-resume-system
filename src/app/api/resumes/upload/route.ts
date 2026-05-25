@@ -30,21 +30,17 @@ export async function POST(req: Request) {
 
     // ---- 2️⃣ Extract raw text ----
     let rawText = '';
-    
-    // Create a mock module.parent to prevent pdf-parse from running its test code
-    const originalParent = module.parent;
-    Object.defineProperty(module, 'parent', { value: null, writable: true, configurable: true });
-    
-    try {
-      if (file.type === 'application/pdf') {
-        const pdfParse = await import('pdf-parse');
+
+    if (file.type === 'application/pdf') {
+      try {
+        // Import the internal lib directly — avoids pdf-parse's test-runner
+        // init code that looks for 'test/data/05-versions-space.pdf'
+        const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
         const pdfData = await pdfParse(buffer);
         rawText = pdfData.text;
-      }
-    } finally {
-      // Restore original module.parent
-      if (originalParent) {
-        Object.defineProperty(module, 'parent', { value: originalParent, writable: true, configurable: true });
+      } catch (pdfErr: any) {
+        console.error('[upload] PDF parse error:', pdfErr.message);
+        rawText = '';
       }
     }
 
@@ -76,6 +72,10 @@ export async function POST(req: Request) {
       .select('description, title')
       .eq('id', jobId)
       .single();
+
+    if (!jobData) {
+      return NextResponse.json({ error: `Job with ID ${jobId} not found` }, { status: 404 });
+    }
 
     const { aiService } = await import('@/services/ai.service');
     const aiResults = await aiService.analyzeResume(
