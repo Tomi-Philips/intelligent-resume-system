@@ -33,7 +33,8 @@ export default function SignupPage() {
           data: {
             full_name: name,
             role: role
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
 
