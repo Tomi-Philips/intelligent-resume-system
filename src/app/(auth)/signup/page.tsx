@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<'user' | 'recruiter'>('user');
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ export default function SignupPage() {
         options: {
           data: {
             full_name: name,
-            role: 'recruiter' // Default role for new signups
+            role: role
           }
         }
       });
@@ -170,6 +171,36 @@ export default function SignupPage() {
                       className="pl-10 h-12 bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 rounded-xl focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       required
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">I want to register as a</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setRole('user')}
+                      className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-center transition-all duration-200 cursor-pointer ${
+                        role === 'user'
+                          ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-md shadow-blue-500/10'
+                          : 'border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/20'
+                      }`}
+                    >
+                      <User className={`w-5 h-5 mb-1.5 ${role === 'user' ? 'text-blue-500' : 'text-slate-400'}`} />
+                      <span className="text-xs font-bold uppercase tracking-wide">Job Seeker</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole('recruiter')}
+                      className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border text-center transition-all duration-200 cursor-pointer ${
+                        role === 'recruiter'
+                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-md shadow-indigo-500/10'
+                          : 'border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/20'
+                      }`}
+                    >
+                      <Briefcase className={`w-5 h-5 mb-1.5 ${role === 'recruiter' ? 'text-indigo-500' : 'text-slate-400'}`} />
+                      <span className="text-xs font-bold uppercase tracking-wide">Recruiter</span>
+                    </button>
                   </div>
                 </div>
 

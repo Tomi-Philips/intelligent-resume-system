@@ -5,8 +5,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Settings, User, Bell, Shield, LogOut, Save, CheckCircle } from 'lucide-react';
+import { Settings, User, Bell, Shield, LogOut, Save, CheckCircle, Trash2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/ui/Modal';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const [notifs, setNotifs] = useState({
     newUploads: true,
@@ -44,6 +48,20 @@ export default function SettingsPage() {
     setIsSigningOut(true);
     await supabase.auth.signOut();
     router.push('/login');
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      const { error } = await supabase.rpc('delete_own_user');
+      if (error) throw error;
+      await supabase.auth.signOut();
+      router.push('/login');
+    } catch (e: any) {
+      setDeleteError(e.message || 'Failed to delete account');
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -142,8 +160,8 @@ export default function SettingsPage() {
             <CardTitle className="text-lg font-bold">Account</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50/50 dark:bg-rose-500/5">
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50/50 dark:bg-rose-500/5 gap-4">
             <div>
               <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">Sign Out</p>
               <p className="text-xs text-rose-500/70 mt-0.5">You will be redirected to the login page</p>
@@ -152,14 +170,75 @@ export default function SettingsPage() {
               onClick={handleSignOut}
               isLoading={isSigningOut}
               disabled={isSigningOut}
-              className="gap-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl border-none shadow-sm"
+              className="gap-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl border-none shadow-sm cursor-pointer"
             >
               {!isSigningOut && <LogOut className="w-4 h-4" />}
               {isSigningOut ? 'Signing out…' : 'Sign Out'}
             </Button>
           </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50/50 dark:bg-rose-500/5 gap-4">
+            <div>
+              <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">Delete Account</p>
+              <p className="text-xs text-rose-500/70 mt-0.5">Permanently delete your profile and application history</p>
+            </div>
+            <Button
+              onClick={() => setDeleteConfirmOpen(true)}
+              className="gap-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl border-none shadow-sm cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Account
+            </Button>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+        open={deleteConfirmOpen}
+        onClose={() => !isDeleting && setDeleteConfirmOpen(false)}
+        title="Confirm Account Deletion"
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-start gap-2.5 text-sm dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400">
+            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-bold">Permanent Deletion Warning</p>
+              <p className="text-xs text-rose-600 dark:text-rose-400/80 mt-0.5">
+                This will delete your credentials, application history, evaluations, and resumes permanently. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          {deleteError && (
+            <p className="text-sm text-rose-500 font-semibold">{deleteError}</p>
+          )}
+
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Are you sure you want to permanently delete your account from the HireFlow server?
+          </p>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+            <Button
+              variant="ghost"
+              className="rounded-xl"
+              onClick={() => setDeleteConfirmOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteAccount}
+              isLoading={isDeleting}
+              disabled={isDeleting}
+              className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl border-none shadow-md cursor-pointer"
+            >
+              Confirm Deletion
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

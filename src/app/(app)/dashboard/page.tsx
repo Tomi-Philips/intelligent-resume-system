@@ -2,11 +2,14 @@ import React, { Suspense } from 'react';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TopCandidates } from '@/components/dashboard/TopCandidates';
+import { UserDashboard } from '@/components/dashboard/UserDashboard';
+import { SuperAdminDashboard } from '@/components/dashboard/SuperAdminDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { jobService } from '@/services/job.service';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Briefcase, ArrowRight, Activity, Plus, Trophy } from 'lucide-react';
+import { Briefcase, ArrowRight, Activity, Plus, Trophy, ShieldAlert } from 'lucide-react';
+import { createSupabaseServerClient } from '@/lib/supabaseServer';
 
 function SkeletonCard() {
   return (
@@ -35,12 +38,73 @@ function SkeletonList() {
   );
 }
 
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
-
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let role = 'user';
+  let status = 'active';
+
+  if (user) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', user.id)
+        .single();
+        
+      if (profile) {
+        role = profile.role ?? 'user';
+        status = profile.status ?? 'active';
+      } else {
+        role = user.user_metadata?.role ?? 'user';
+      }
+    } catch (err) {
+      console.error('Error fetching user profile in dashboard page:', err);
+      role = user.user_metadata?.role ?? 'user';
+    }
+  }
+
+  // Handle suspended state
+  if (status === 'suspended') {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <Card className="max-w-md w-full border border-rose-200 dark:border-rose-500/20 shadow-2xl bg-white/80 dark:bg-[#111318]/80 backdrop-blur-xl rounded-2xl overflow-hidden text-center p-8">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 mx-auto mb-4 animate-bounce">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Account Suspended</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
+            Your account has been locked or suspended by the system administrator. If you believe this is an error, please contact Support.
+          </p>
+          <div className="mt-6 border-t border-slate-100 dark:border-slate-800/60 pt-6 flex flex-col gap-3">
+            <p className="text-xs text-slate-400">
+              You may still access Settings to delete your credentials if you wish to exit the platform.
+            </p>
+            <Link href="/settings" className="w-full">
+              <Button variant="outline" className="w-full rounded-xl border-slate-200 dark:border-slate-800">
+                Go to Account Settings
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Handle Super Admin
+  if (role === 'super_admin') {
+    return <SuperAdminDashboard />;
+  }
+
+  // Handle Candidate (User)
+  if (role === 'user') {
+    return <UserDashboard />;
+  }
+
+  // Default Recruiter View
   let recentJobs: Awaited<ReturnType<typeof jobService.getJobs>> = [];
   try {
     recentJobs = await jobService.getJobs(supabase);

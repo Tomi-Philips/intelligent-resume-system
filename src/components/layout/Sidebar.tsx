@@ -24,7 +24,7 @@ import {
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { name, email, signOut } = useAuth();
+  const { name, email, role, status, signOut } = useAuth();
   const [candidateCount, setCandidateCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function Sidebar() {
       }
     }
     fetchCount();
-  }, []);
+  }, [role]);
 
   const getInitials = (userName: string) => {
     const parts = userName.split(' ');
@@ -51,18 +51,44 @@ export function Sidebar() {
     return userName.slice(0, 2).toUpperCase();
   };
 
-  const links = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/jobs', label: 'Jobs', icon: Briefcase },
-    { href: '/candidates', label: 'Candidates', icon: Users },
-    { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/reports', label: 'Reports', icon: FileText },
-  ];
+  const getLinks = () => {
+    if (status === 'suspended') {
+      return [];
+    }
+    if (role === 'super_admin') {
+      return [
+        { href: '/dashboard', label: 'Admin Dashboard', icon: LayoutDashboard },
+      ];
+    }
+    if (role === 'user') {
+      return [
+        { href: '/dashboard', label: 'Portal Home', icon: LayoutDashboard },
+        { href: '/jobs', label: 'Browse Jobs', icon: Briefcase },
+      ];
+    }
+    return [
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/jobs', label: 'Jobs', icon: Briefcase },
+      { href: '/candidates', label: 'Candidates', icon: Users },
+      { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+      { href: '/reports', label: 'Reports', icon: FileText },
+    ];
+  };
 
-  const secondaryLinks = [
-    { href: '/settings', label: 'Settings', icon: Settings },
-    { href: '/help', label: 'Help & Support', icon: HelpCircle },
-  ];
+  const getSecondaryLinks = () => {
+    if (status === 'suspended') {
+      return [
+        { href: '/settings', label: 'Settings', icon: Settings },
+      ];
+    }
+    return [
+      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: '/help', label: 'Help & Support', icon: HelpCircle },
+    ];
+  };
+
+  const links = getLinks();
+  const secondaryLinks = getSecondaryLinks();
 
   return (
     <div 
@@ -148,14 +174,20 @@ export function Sidebar() {
       </nav>
 
       {/* AI Insight Box */}
-      {!collapsed && (
+      {!collapsed && status !== 'suspended' && (
         <div className="mx-4 my-4 p-4 rounded-xl bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <span className="text-xs font-semibold text-blue-400">AI Insight</span>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            You have <span className="text-blue-400 font-bold">{candidateCount !== null ? `${candidateCount} candidates` : 'new candidates'}</span> matched for your active positions.
+            {role === 'super_admin' ? (
+              <span>The database currently monitors <span className="text-blue-400 font-bold">{candidateCount !== null ? `${candidateCount} candidates` : 'candidates'}</span> across the system.</span>
+            ) : role === 'user' ? (
+              <span>You have submitted <span className="text-blue-400 font-bold">{candidateCount !== null ? `${candidateCount} applications` : 'applications'}</span> to active job posts.</span>
+            ) : (
+              <span>You have <span className="text-blue-400 font-bold">{candidateCount !== null ? `${candidateCount} candidates` : 'new candidates'}</span> matched for your active positions.</span>
+            )}
           </p>
         </div>
       )}
@@ -171,8 +203,18 @@ export function Sidebar() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{name}</p>
                 <div className="flex items-center gap-1">
-                  <Crown className="w-3 h-3 text-amber-500" />
-                  <p className="text-xs text-slate-400">Admin Plan</p>
+                  {status === 'suspended' ? (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                      Suspended
+                    </span>
+                  ) : (
+                    <>
+                      <Crown className="w-3 h-3 text-amber-500" />
+                      <p className="text-xs text-slate-400">
+                        {role === 'super_admin' ? 'Super Admin' : role === 'user' ? 'Job Seeker' : 'Recruiter Plan'}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

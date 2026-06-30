@@ -13,6 +13,10 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File;
     const jobId = formData.get('jobId') as string;
 
+    const customName = formData.get('name') as string || null;
+    const customEmail = formData.get('email') as string || null;
+    const customPhone = formData.get('phone') as string || null;
+
     if (!file || !jobId) {
       return NextResponse.json({ error: 'Missing file or jobId' }, { status: 400 });
     }
@@ -84,13 +88,15 @@ export async function POST(req: Request) {
     );
 
     // ---- 5️⃣ Create candidate record ----
-    const candidateName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+    const candidateName = customName || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
     const { data: candidateData, error: candidateError } = await supabase
       .from('candidates')
       .insert({
         job_id: jobId,
         resume_id: resumeData.id,
         name: candidateName,
+        email: customEmail,
+        phone: customPhone,
         status: 'pending',
         score: aiResults.score,
         match_breakdown: {

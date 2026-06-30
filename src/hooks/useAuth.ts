@@ -7,20 +7,70 @@ import { useRouter } from 'next/navigation';
 export function useAuth() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string>('user');
+  const [status, setStatus] = useState<string>('active');
   const router = useRouter();
+
+  // Separate effect to load profile when user changes
+  useEffect(() => {
+    let mounted = true;
+
+    if (!user) {
+      setRole('user');
+      setStatus('active');
+      return;
+    }
+
+    async function fetchProfile(userId: string, retryOnce = true) {
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', userId)
+          .single();
+
+        if (!mounted) return;
+
+        if (!profileError && profile) {
+          setRole(profile.role ?? 'user');
+          setStatus(profile.status ?? 'active');
+          return;
+        }
+
+        // If the profile row doesn't exist yet (trigger propagation lag), retry once after 1s
+        if (retryOnce) {
+          await new Promise((res) => setTimeout(res, 1000));
+          if (mounted) {
+            await fetchProfile(userId, false);
+          }
+        } else {
+          console.warn('Could not fetch profile from DB:', profileError?.message);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    }
+
+    fetchProfile(user.id);
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     let mounted = true;
 
-    async function getUser() {
+    async function getUserAndProfile() {
       try {
         const { data: { user: currentUser }, error } = await supabase.auth.getUser();
         if (error) {
-          // If we are in dev/prototype and using placeholder credentials, it might warn/error.
           console.warn('Supabase auth getUser error:', error.message);
         }
-        if (mounted) {
+        if (currentUser && mounted) {
           setUser(currentUser);
+        }
+        if (mounted) {
           setLoading(false);
         }
       } catch (err) {
@@ -31,12 +81,13 @@ export function useAuth() {
       }
     }
 
-    getUser();
+    getUserAndProfile();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
         setLoading(false);
       }
     });
@@ -65,6 +116,8 @@ export function useAuth() {
     loading,
     name,
     email,
+    role,
+    status,
     signOut,
   };
 }
