@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local design and concept documents
+Software Concept.md
+Project Style.txt
+
