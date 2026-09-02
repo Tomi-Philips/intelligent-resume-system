@@ -75,8 +75,7 @@ export const Navbar: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    window.location.href = '/';
   };
 
   return (

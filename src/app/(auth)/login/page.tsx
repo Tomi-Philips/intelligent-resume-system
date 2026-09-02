@@ -40,48 +40,46 @@ function LoginForm() {
       }
 
       if (data?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+        let destination = redirectUrl;
 
-        const role = profile?.role || data.user.user_metadata?.role;
-
-        if (redirectUrl) {
-          router.push(redirectUrl);
-          router.refresh();
-          return;
-        }
-
-        if (role === 'admin') {
-          router.push('/admin/dashboard');
-        } else if (role === 'company') {
-          const { data: company } = await supabase
-            .from('companies')
+        if (!destination) {
+          const { data: profile } = await supabase
+            .from('profiles')
             .select('*')
-            .eq('user_id', data.user.id)
-            .maybeSingle();
+            .eq('id', data.user.id)
+            .single();
 
-          if (!isCompanyProfileComplete(company as Company | null)) {
-            router.push('/company/profile');
+          const role = profile?.role || data.user.user_metadata?.role;
+
+          if (role === 'admin') {
+            destination = '/admin/dashboard';
+          } else if (role === 'company') {
+            const { data: company } = await supabase
+              .from('companies')
+              .select('*')
+              .eq('user_id', data.user.id)
+              .maybeSingle();
+
+            if (!isCompanyProfileComplete(company as Company | null)) {
+              destination = '/company/profile';
+            } else {
+              destination = '/company/dashboard';
+            }
           } else {
-            router.push('/company/dashboard');
-          }
-        } else {
-          // Job Seeker
-          if (!isJobSeekerProfileComplete(profile as Profile | null)) {
-            router.push('/profile');
-          } else {
-            router.push('/dashboard');
+            // Job Seeker
+            if (!isJobSeekerProfileComplete(profile as Profile | null)) {
+              destination = '/profile';
+            } else {
+              destination = '/dashboard';
+            }
           }
         }
-        router.refresh();
+
+        window.location.href = destination || '/dashboard';
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred';
       setErrorMsg(msg);
-    } finally {
       setIsLoading(false);
     }
   };

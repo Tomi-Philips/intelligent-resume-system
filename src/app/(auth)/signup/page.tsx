@@ -72,11 +72,10 @@ export default function SignupPage() {
 
         if (data.session) {
           if (selectedRole === 'company') {
-            router.push('/company/profile');
+            window.location.href = '/company/profile';
           } else {
-            router.push('/profile');
+            window.location.href = '/profile';
           }
-          router.refresh();
         } else {
           setSuccessMsg('Account created successfully! Please check your email to verify your address, then sign in.');
         }
